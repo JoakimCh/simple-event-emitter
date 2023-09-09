@@ -28,9 +28,6 @@ export class EventEmitter {
     const listenerMap = this.#listenersMap.get(event)
     if (listenerMap) {
       listenerMap.set(listener, once)
-      for (const listener of listenerMap) {
-        listener()
-      }
     } else {
       const listenerMap = new Map()
       listenerMap.set(listener, once)
