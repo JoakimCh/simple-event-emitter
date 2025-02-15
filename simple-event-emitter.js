@@ -23,6 +23,10 @@ export class EventEmitter {
   }
   
   emit(event, ...args) {
+    this.#emit(event, ...args)
+  }
+
+  #emit(event, ...args) {
     const listenerMap = this.#listenersMap.get(event)
     if (listenerMap) {
       for (const [listener, once] of listenerMap.entries()) {
@@ -36,7 +40,7 @@ export class EventEmitter {
               if (typeof this[Symbol.for('nodejs.rejection')] == 'function') {
                 this[Symbol.for('nodejs.rejection')](error)
               } else if (event != 'error') {
-                this.emit('error', error)
+                this.#emit('error', error)
               } else {
                 throw error
               }
@@ -45,7 +49,7 @@ export class EventEmitter {
         } catch (error) {
           error = new ListenerError(error)
           if (this.captureExceptions && event != 'error') {
-            this.emit('error', error)
+            this.#emit('error', error)
           } else {
             throw error
           }
@@ -59,9 +63,9 @@ export class EventEmitter {
     }
     return false
   }
-  
+
   addEventListener(event, listener, {once} = {}) {
-    this.emit('newListener', event, listener, once)
+    this.#emit('newListener', event, listener, once)
     let listenerMap = this.#listenersMap.get(event)
     if (!listenerMap) {
       listenerMap = new Map()
@@ -75,7 +79,7 @@ export class EventEmitter {
     const listenerMap = this.#listenersMap.get(event)
     if (listenerMap) {
       listenerMap.delete(listener)
-      this.emit('removeListener', event, listener)
+      this.#emit('removeListener', event, listener)
       if (!listenerMap.size) this.#listenersMap.delete(event)
       return true
     }
@@ -87,7 +91,7 @@ export class EventEmitter {
       const listenerMap = this.#listenersMap.get(event)
       if (listenerMap) {
         for (const listener of listenerMap.keys()) {
-          this.emit('removeListener', event, listener)
+          this.#emit('removeListener', event, listener)
         }
         this.#listenersMap.delete(event)
       }
