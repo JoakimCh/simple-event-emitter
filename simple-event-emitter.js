@@ -57,9 +57,11 @@ export class EventEmitter {
       }
       return true
     } else if (event == 'error') {
-      throw Error('Emitted an error, but no error listener is assigned.', {
+      const error = Error('Emitted an error, but no error listener is assigned.', {
         cause: args.length == 1 ? args[0] : args
       })
+      error.code = 'NO_ERROR_LISTENER'
+      throw error
     }
     return false
   }
