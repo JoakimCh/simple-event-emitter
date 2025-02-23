@@ -64,14 +64,26 @@ export class EventEmitter {
     return false
   }
 
-  addEventListener(event, listener, {once} = {}) {
+  addEventListener(event, listener, {once, first} = {}) {
     this.#emit('newListener', event, listener, once)
     let listenerMap = this.#listenersMap.get(event)
     if (!listenerMap) {
       listenerMap = new Map()
       this.#listenersMap.set(event, listenerMap)
     }
-    listenerMap.set(listener, once)
+    if (first && listenerMap.size) {
+      listenerMap.delete(listener) // if already there
+      const entries = [
+        [listener, once], // add first
+        ...listenerMap.entries()
+      ]
+      listenerMap.clear()
+      for (const [key, value] of entries) {
+        listenerMap.set(key, value)
+      }
+    } else {
+      listenerMap.set(listener, once)
+    }
     return this
   }
 
@@ -102,12 +114,12 @@ export class EventEmitter {
     }
   }
 
-  on(event, listener) {
-    return this.addEventListener(event, listener)
+  on(event, listener, {first} = {}) {
+    return this.addEventListener(event, listener, {first})
   }
 
-  once(event, listener) {
-    return this.addEventListener(event, listener, {once: true})
+  once(event, listener, {first} = {}) {
+    return this.addEventListener(event, listener, {once: true, first})
   }
 
   off(event, listener) {
