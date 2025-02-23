@@ -29,7 +29,7 @@ export class EventEmitter {
   #emit(event, ...args) {
     const listenerMap = this.#listenersMap.get(event)
     if (listenerMap) {
-      for (const [listener, once] of listenerMap.entries()) {
+      for (const [listener, once] of [...listenerMap.entries()]) {
         if (once) this.removeEventListener(event, listener)
         try {
           const result = listener(...args)
