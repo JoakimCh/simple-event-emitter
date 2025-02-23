@@ -1,7 +1,8 @@
 
 class ListenerError extends Error {
-  constructor(cause) {
+  constructor(cause, args) {
     super('An event listener had an error.', {cause})
+    this.args = args
   }
 }
 
@@ -36,7 +37,7 @@ export class EventEmitter {
           if (result instanceof Promise && this.captureRejections) {
             // https://nodejs.org/api/events.html#capture-rejections-of-promises
             result.catch(error => {
-              error = new ListenerError(error)
+              error = new ListenerError(error, args)
               if (typeof this[Symbol.for('nodejs.rejection')] == 'function') {
                 this[Symbol.for('nodejs.rejection')](error)
               } else if (event != 'error') {
@@ -47,7 +48,7 @@ export class EventEmitter {
             })
           }
         } catch (error) {
-          error = new ListenerError(error)
+          error = new ListenerError(error, args)
           if (this.captureExceptions && event != 'error') {
             this.#emit('error', error)
           } else {
